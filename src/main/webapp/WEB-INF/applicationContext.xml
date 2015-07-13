@@ -9,53 +9,12 @@
 
 	<!-- FsService is often retrieved from HttpRequest -->
 	<!-- while a static FsService is defined here -->
-	<!-- FsService is often retrieved from HttpRequest -->
-	<!-- while a static FsService is defined here -->
-	<bean id="fsServiceFactory" class="cn.bluejoe.elfinder.impl.StaticFsServiceFactory">
+	<bean id="fsServiceFactory" class="org.sakaiproject.elfinder.SakaiFsServiceFactory">
 		<property name="fsService">
-			<bean class="cn.bluejoe.elfinder.impl.DefaultFsService" id="">
-				<property name="serviceConfig">
-					<bean class="cn.bluejoe.elfinder.impl.DefaultFsServiceConfig">
-						<property name="tmbWidth" value="80" />
-					</bean>
-				</property>
-				<property name="volumes">
-					<list>
-						<ref bean="sampleVolume"/>
-					</list>
-				</property>
-				<property name="securityChecker">
-					<bean class="cn.bluejoe.elfinder.impl.FsSecurityCheckerChain">
-						<property name="filterMappings">
-							<list>
-								<bean class="cn.bluejoe.elfinder.impl.FsSecurityCheckFilterMapping">
-									<property name="pattern" value="A_.*" />
-									<property name="checker">
-										<bean class="cn.bluejoe.elfinder.impl.FsSecurityCheckForAll">
-											<property name="readable" value="true" />
-											<property name="writable" value="true" />
-										</bean>
-									</property>
-								</bean>
-								<bean class="cn.bluejoe.elfinder.impl.FsSecurityCheckFilterMapping">
-									<property name="pattern" value="B_.*" />
-									<property name="checker">
-										<bean class="cn.bluejoe.elfinder.impl.FsSecurityCheckForAll">
-											<property name="readable" value="true" />
-											<property name="writable" value="false" />
-										</bean>
-									</property>
-								</bean>
-							</list>
-						</property>
-					</bean>
-				</property>
+			<bean class="org.sakaiproject.elfinder.SakaiFsService">
+				<property name="contentHostingService" ref="org.sakaiproject.content.api.ContentHostingService"/>
+				<property name="siteService" ref="org.sakaiproject.site.api.SiteService"/>
 			</bean>
 		</property>
-	</bean>
-
-	<bean class="org.sakaiproject.elfinder.SakaiFsVolume" id="sampleVolume">
-		<property name="service"
-		<property name="siteId" value="080ede53-4167-4efd-bff2-6f406907a78f" />
 	</bean>
 </beans>

@@ -13,18 +13,20 @@
 			org.sakaiproject.util.ContextLoaderListener
 		</listener-class>
 	</listener>
+
+	<filter>
+		<filter-name>RequestFilter</filter-name>
+		<filter-class>org.sakaiproject.util.RequestFilter</filter-class>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>RequestFilter</filter-name>
+		<servlet-name>elfinder</servlet-name>
+	</filter-mapping>
   
 	<servlet>
 		<servlet-name>elfinder</servlet-name>
 		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-		<!--<init-param>-->
-			<!--<param-name>contextClass</param-name>-->
-			<!--<param-value>org.sakaiproject.component.impl.ContextLoader</param-value>-->
-		<!--</init-param>-->
-		<!--<init-param>-->
-			<!--<param-name>contextAttribute</param-name>-->
-			<!--<param-value>contextSharedLocation</param-value>-->
-		<!--</init-param>-->
 	</servlet>
 
 	<servlet-mapping>
