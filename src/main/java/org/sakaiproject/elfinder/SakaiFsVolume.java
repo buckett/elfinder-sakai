@@ -124,7 +124,7 @@ public class SakaiFsVolume implements FsVolume {
     public String getMimeType(FsItem fsi) {
         String id = service.asId(fsi);
         if (service.getContent().isCollection(id)) {
-            return "";
+            return "directory";
         } else {
             try {
                 ContentResource resource = service.getContent().getResource(id);
@@ -144,10 +144,10 @@ public class SakaiFsVolume implements FsVolume {
         // This needs more test cases
         String id = service.asId(fsi);
         int lastSlash = id.lastIndexOf("/");
-        if (lastSlash == id.length()) {
-            lastSlash = id.lastIndexOf("/", -1);
+        if ((lastSlash+1) == id.length()) {
+            lastSlash = id.lastIndexOf("/", lastSlash-1);
         }
-        return id.substring(lastSlash);
+        return id.substring(lastSlash+1).replace("/", "");
     }
 
     public FsItem getParent(FsItem fsi) {
@@ -239,23 +239,8 @@ public class SakaiFsVolume implements FsVolume {
     }
 
     public OutputStream openOutputStream(final FsItem fsi) throws IOException {
-        // This doesn't work at all as we are normally given an input stream which we can read our data from.
-        // Stuffing it all into a byte array is horrible as we can't use heap memory
-        return new ByteArrayOutputStream() {
-            public void close() throws IOException {
-                String id = service.asId(fsi);
-                try
-                {
-                    ContentResourceEdit resource = service.getContent().editResource(id);
-                    resource.setContent(this.toByteArray());
-                    service.getContent().commitResource(resource);
-                } catch ( SakaiException se )
-                {
-                    throw new IOException("Failed to open input stream for: " + id, se);
-                }
-                super.close();
-            }
-        };
+    	//not needed
+        return null;
     }
 
     public void rename(FsItem src, FsItem dst) throws IOException {
