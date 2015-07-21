@@ -1,14 +1,23 @@
 package org.sakaiproject.elfinder;
 
 import cn.bluejoe.elfinder.service.*;
+
+import org.sakaiproject.antivirus.api.VirusFoundException;
 import org.sakaiproject.content.api.ContentCollection;
 import org.sakaiproject.content.api.ContentEntity;
 import org.sakaiproject.content.api.ContentHostingService;
 import org.sakaiproject.content.api.ContentResource;
+import org.sakaiproject.content.api.ContentResourceEdit;
+import org.sakaiproject.exception.OverQuotaException;
 import org.sakaiproject.exception.SakaiException;
+import org.sakaiproject.exception.ServerOverloadException;
 import org.sakaiproject.site.api.SiteService;
+import org.sakaiproject.tool.api.SessionManager;
+import org.sakaiproject.tool.api.ToolManager;
+import org.apache.commons.codec.binary.Base64;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import static org.sakaiproject.content.api.ContentHostingService.COLLECTION_SITE;
 
@@ -19,39 +28,63 @@ public class SakaiFsService implements FsService {
 
         private ContentHostingService contentHostingService;
         private SiteService siteService;
+        private SessionManager sessionManager;
+        private ToolManager toolManager;
+        
+        FsVolume[] _volumes;
+        
+        String[][] escapes = { { "+", "_P" }, { "-", "_M" }, { "/", "_S" }, { ".", "_D" }, { "=", "_E" } };
 
         public FsItem fromHash(String hash) throws IOException {
-                if (hash == null || hash.isEmpty()) {
-                       return null;
-                }
-                String id = getContent().resolveUuid(hash);
-                if (id == null) {
-                        return null;
-                }
-                String siteId = "";
-                if (id.startsWith(COLLECTION_SITE)) {
-                        int nextSlash = id.indexOf('/', COLLECTION_SITE.length());
-                        if (nextSlash > 0) {
-                                 siteId = id.substring(COLLECTION_SITE.length(), nextSlash);
-                        }
-                }
-                // Todo need to get Site ID from path.
-                try {
-                        ContentEntity contentEntity;
-                        if (contentHostingService.isCollection(id)) {
-                                contentEntity = contentHostingService.getCollection(id);
-                        } else {
-                                contentEntity = contentHostingService.getResource(id);
-                        }
-                        return new SakaiFsItem(new SakaiFsVolume(this, siteId), contentEntity.getId());
-                } catch (SakaiException se) {
-                        throw new IOException("Failed to get file from hash: "+ id, se);
-                }
+        	if (hash == null || hash.isEmpty()) {
+        		return null;
+        	}
+        	/*String id = getContent().resolveUuid(hash);
+            if (id == null) {
+            	return null;
+            }*/
+
+        	try {
+
+				for (String[] pair : escapes)
+				{
+					hash = hash.replace(pair[1], pair[0]);
+				}
+				String path = new String(Base64.decodeBase64(hash));
+        		
+        		ContentEntity contentEntity;
+        		if (contentHostingService.isCollection(path)) {
+        			contentEntity = contentHostingService.getCollection(path);
+        		} else {
+        			contentEntity = contentHostingService.getResource(path);
+        		}
+        		String id = contentEntity.getId();
+        		String siteId = "";
+        		if (id.startsWith(COLLECTION_SITE)) {
+        			int nextSlash = id.indexOf('/', COLLECTION_SITE.length());
+        			if (nextSlash > 0) {
+        				siteId = id.substring(COLLECTION_SITE.length(), nextSlash);
+        			}
+        		}        		
+        		return new SakaiFsItem(getVolumes()[0], contentEntity.getId());
+        	/*} catch (SakaiException se) {
+        		throw new IOException("Failed to get file from hash: "+ hash, se);
+        	*/} catch (Exception e) {
+        		return null;
+        	}
         }
 
         public String getHash(FsItem item) throws IOException {
                 String id = asId(item);
-                return getContent().getUuid(id);
+                
+                String base = new String(Base64.encodeBase64(id.getBytes()));
+
+        		for (String[] pair : escapes)
+        		{
+        			base = base.replace(pair[0], pair[1]);
+        		}
+                //return getContent().getUuid(id);
+                return base;
         }
 
         public FsSecurityChecker getSecurityChecker() {
@@ -69,7 +102,18 @@ public class SakaiFsService implements FsService {
         }
 
         public FsVolume[] getVolumes() {
-                return new FsVolume[]{ new SakaiFsVolume(this, "080ede53-4167-4efd-bff2-6f406907a78f")};
+        	//TODO : current site???
+        	//TODO : one volume per entity provider(contents, assignments, announcements...)???
+        	//TODO : cache??
+        	//if(_volumes == null)
+        	try {
+        		String currentSiteId = "6508bbe2-2016-4b7c-bf0d-3f8a8d9e6042";
+        		_volumes = new FsVolume[]{ new SakaiFsVolume(this, currentSiteId)};
+    		} catch (Exception e) {
+    			e.printStackTrace();
+    			return new FsVolume[]{};
+    		}
+        	return _volumes;
         }
 
         public FsServiceConfig getServiceConfig() {
@@ -95,6 +139,22 @@ public class SakaiFsService implements FsService {
                         throw new IllegalArgumentException("Passed FsItem must be a SakaiFsItem.");
                 }
         }
+        
+        public Boolean copyContent(InputStream is, String hash) {
+        	try {
+        		String id = asId(fromHash(hash));
+        		ContentResourceEdit resource = getContent().editResource(id);
+        		resource.setContent(is);
+        		getContent().commitResource(resource);
+        		return true;
+        	} catch (OverQuotaException | ServerOverloadException | VirusFoundException e) {
+        		e.printStackTrace();
+
+        	} catch (Exception e) {
+        		e.printStackTrace();
+        	}
+        	return false;
+        }
 
         public void setSiteService(SiteService siteService) {
                 this.siteService = siteService;
@@ -103,4 +163,12 @@ public class SakaiFsService implements FsService {
         public void setContentHostingService(ContentHostingService contentHostingService) {
                 this.contentHostingService = contentHostingService;
         }
+
+		public void setSessionManager(SessionManager sessionManager) {
+			this.sessionManager = sessionManager;
+		}
+
+		public void setToolManager(ToolManager toolManager) {
+			this.toolManager = toolManager;
+		}
 }
