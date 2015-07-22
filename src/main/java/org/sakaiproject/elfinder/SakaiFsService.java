@@ -45,27 +45,27 @@ public class SakaiFsService implements FsService {
             }*/
 
         	try {
-
+        		//TODO : add cache/map??
 				for (String[] pair : escapes)
 				{
 					hash = hash.replace(pair[1], pair[0]);
 				}
 				String path = new String(Base64.decodeBase64(hash));
-        		
         		ContentEntity contentEntity;
         		if (contentHostingService.isCollection(path)) {
         			contentEntity = contentHostingService.getCollection(path);
         		} else {
         			contentEntity = contentHostingService.getResource(path);
         		}
-        		String id = contentEntity.getId();
+        		/*String id = contentEntity.getId();
         		String siteId = "";
         		if (id.startsWith(COLLECTION_SITE)) {
         			int nextSlash = id.indexOf('/', COLLECTION_SITE.length());
         			if (nextSlash > 0) {
         				siteId = id.substring(COLLECTION_SITE.length(), nextSlash);
         			}
-        		}        		
+        		}*/
+        		//TODO : getVolumes???? siteId is needed??
         		return new SakaiFsItem(getVolumes()[0], contentEntity.getId());
         	/*} catch (SakaiException se) {
         		throw new IOException("Failed to get file from hash: "+ hash, se);
@@ -75,16 +75,16 @@ public class SakaiFsService implements FsService {
         }
 
         public String getHash(FsItem item) throws IOException {
-                String id = asId(item);
-                
-                String base = new String(Base64.encodeBase64(id.getBytes()));
+        	String id = asId(item);
 
-        		for (String[] pair : escapes)
-        		{
-        			base = base.replace(pair[0], pair[1]);
-        		}
-                //return getContent().getUuid(id);
-                return base;
+        	String base = new String(Base64.encodeBase64(id.getBytes()));
+
+        	for (String[] pair : escapes)
+        	{
+        		base = base.replace(pair[0], pair[1]);
+        	}
+        	//return getContent().getUuid(id);
+        	return base;
         }
 
         public FsSecurityChecker getSecurityChecker() {

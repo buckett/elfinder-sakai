@@ -23,22 +23,21 @@ public class SakaiUploadCommandExecutor extends AbstractJsonCommandExecutor impl
 	public void execute(FsService fsService, HttpServletRequest request, ServletContext servletContext, JSONObject json) throws Exception {
 		if (fsService instanceof SakaiFsService) {
 			SakaiFsService sfsService = (SakaiFsService)fsService;
-			
+
 			List<FileItemStream> listFiles = (List<FileItemStream>)request.getAttribute(FileItemStream.class.getName());
 			List<FsItemEx> added = new ArrayList<FsItemEx>();
-			
+
 			String target = request.getParameter("target");
-			FsItemEx dir = super.findItem((FsService)sfsService, target);
-			
-			for (final FileItemStream fis : listFiles) {
+			FsItemEx dir = findItem(sfsService, target);
+			for (FileItemStream fis : listFiles) {
 				String fileName = fis.getName();
 				FsItemEx newFile = new FsItemEx(dir, fileName);
 				newFile.createFile();
 				
 				InputStream is = fis.openStream();
-				boolean b = sfsService.copyContent(is, newFile.getHash());
+				if(sfsService.copyContent(is, newFile.getHash()))
+					added.add(newFile);
 				is.close();
-				added.add(newFile);
 			}
 			json.put("added", (Object)this.files2JsonArray(request, (Collection)added));
 		}
