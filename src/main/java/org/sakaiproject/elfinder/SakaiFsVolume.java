@@ -46,15 +46,18 @@ public class SakaiFsVolume implements FsVolume {
     public void createFile(FsItem fsi) throws IOException {
         String id = service.asId(fsi);
         try {
-        	String filename = getName(fsi);
+        	String filename = getLocalName(fsi);
         	String name="", ext="";
         	int index = filename.lastIndexOf(".");
         	if(index >= 0){
         		name = filename.substring(0, index);
         		ext = filename.substring(index+1);
         	}
-        	ContentResourceEdit cre = service.getContent().addResource(service.asId(getParent(fsi)), name, ext, 1); 
+        	ContentResourceEdit cre = service.getContent().addResource(service.asId(getParent(fsi)), name, ext, 999); 
             service.getContent().commitResource(cre);
+            //update saved id
+            ((SakaiFsItem)fsi).setId(cre.getId());
+            
         } catch (SakaiException se) {
             throw new IOException("Failed to create new file: "+ id, se);
         }
@@ -66,7 +69,7 @@ public class SakaiFsVolume implements FsVolume {
     	try
     	{
     		String collectionId = service.asId(getParent(fsi));
-    		String name = getName(fsi);
+    		String name = getLocalName(fsi);
     		ContentCollectionEdit edit = service.getContent().addCollection(collectionId, name);
     		ResourcePropertiesEdit props = edit.getPropertiesEdit();
     		props.addProperty(ResourceProperties.PROP_DISPLAY_NAME, name);
@@ -167,20 +170,26 @@ public class SakaiFsVolume implements FsVolume {
                 contentEntity = service.getContent().getResource(id);
             }
             return contentEntity.getProperties().getProperty(ResourceProperties.PROP_DISPLAY_NAME);
-        } catch(IdUnusedException e) { //content does not exists
-        	//we can get name from id (JUST FOR NEW CREATED FsItemEx)
-        	int lastSlash = id.lastIndexOf("/");
-            
-            if(lastSlash < 0) return id;
-            
-            if ((lastSlash+1) == id.length()) {
-                lastSlash = id.lastIndexOf("/", lastSlash-1);
-            }
-            return id.substring(lastSlash+1).replace("/", "");
         } catch (SakaiException se) {
             LOG.warn("Failed to get name for: "+ id, se);
         }
         return id;
+    }
+    
+    public String getLocalName(FsItem fsi) {
+    	String id = service.asId(fsi);
+    	try {
+    		int lastSlash = id.lastIndexOf("/");
+
+    		if(lastSlash < 0) return id;
+
+    		if ((lastSlash+1) == id.length()) {
+    			lastSlash = id.lastIndexOf("/", lastSlash-1);
+    		}
+    		return id.substring(lastSlash+1).replace("/", "");
+    	} catch(Exception e) {
+    		return id;
+    	}
     }
 
     public FsItem getParent(FsItem fsi) {
@@ -282,8 +291,8 @@ public class SakaiFsVolume implements FsVolume {
     }
 
     public void rename(FsItem src, FsItem dst) throws IOException {
-        String srcId = service.asId(src);
-        String dstName = getName(dst);
+    	String srcId = service.asId(src);
+        String dstName = getLocalName(dst);
         
         try {
         	if (service.getContent().isCollection(srcId)) {
