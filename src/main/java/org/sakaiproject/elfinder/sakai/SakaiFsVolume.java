@@ -1,4 +1,4 @@
-package org.sakaiproject.elfinder;
+package org.sakaiproject.elfinder.sakai;
 
 import cn.bluejoe.elfinder.service.FsItem;
 import cn.bluejoe.elfinder.service.FsVolume;
@@ -6,6 +6,7 @@ import cn.bluejoe.elfinder.service.FsVolume;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.content.api.*;
+import org.sakaiproject.elfinder.impl.SakaiFsService;
 import org.sakaiproject.entity.api.EntityPropertyNotDefinedException;
 import org.sakaiproject.entity.api.EntityPropertyTypeException;
 import org.sakaiproject.entity.api.ResourceProperties;

@@ -1,4 +1,4 @@
-package org.sakaiproject.elfinder;
+package org.sakaiproject.elfinder.controller.executors;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -10,19 +10,21 @@ import cn.bluejoe.elfinder.controller.executor.CommandExecutor;
 import cn.bluejoe.elfinder.controller.executor.FsItemEx;
 import cn.bluejoe.elfinder.service.FsService;
 
-public class SakaiMkdirCommandExecutor extends AbstractJsonCommandExecutor implements CommandExecutor
+public class SakaiRenameCommandExecutor extends AbstractJsonCommandExecutor implements CommandExecutor
 {
 	@Override
 	public void execute(FsService fsService, HttpServletRequest request, ServletContext servletContext, JSONObject json)
 			throws Exception
 	{
 		String target = request.getParameter("target");
+		String current = request.getParameter("current");
 		String name = request.getParameter("name");
 
 		FsItemEx fsi = super.findItem(fsService, target);
-		FsItemEx dir = new FsItemEx(fsi, name + "/");
-		dir.createFolder();
+		FsItemEx dst = new FsItemEx(fsi.getParent(), name);
+		fsi.renameTo(dst);
 
-		json.put("added", new Object[] { getFsItemInfo(request, dir) });
+		json.put("added", new Object[] { getFsItemInfo(request, fsi) });
+		json.put("removed", new String[] { target });
 	}
 }

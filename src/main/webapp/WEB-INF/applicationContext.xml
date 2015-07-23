@@ -9,9 +9,9 @@
 
 	<!-- FsService is often retrieved from HttpRequest -->
 	<!-- while a static FsService is defined here -->
-	<bean id="fsServiceFactory" class="org.sakaiproject.elfinder.SakaiFsServiceFactory">
+	<bean id="fsServiceFactory" class="org.sakaiproject.elfinder.impl.SakaiFsServiceFactory">
 		<property name="fsService">
-			<bean class="org.sakaiproject.elfinder.SakaiFsService">
+			<bean class="org.sakaiproject.elfinder.impl.SakaiFsService">
 				<property name="contentHostingService" ref="org.sakaiproject.content.api.ContentHostingService"/>
 				<property name="siteService" ref="org.sakaiproject.site.api.SiteService"/>
 			</bean>

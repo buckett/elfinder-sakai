@@ -1,4 +1,4 @@
-package org.sakaiproject.elfinder;
+package org.sakaiproject.elfinder.controller.executor;
 
 import java.util.Map;
 

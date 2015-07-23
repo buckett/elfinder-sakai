@@ -1,4 +1,4 @@
-package org.sakaiproject.elfinder;
+package org.sakaiproject.elfinder.impl;
 
 import cn.bluejoe.elfinder.service.FsServiceConfig;
 

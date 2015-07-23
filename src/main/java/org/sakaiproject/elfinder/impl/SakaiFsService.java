@@ -1,4 +1,4 @@
-package org.sakaiproject.elfinder;
+package org.sakaiproject.elfinder.impl;
 
 import cn.bluejoe.elfinder.service.*;
 
@@ -8,6 +8,8 @@ import org.sakaiproject.content.api.ContentEntity;
 import org.sakaiproject.content.api.ContentHostingService;
 import org.sakaiproject.content.api.ContentResource;
 import org.sakaiproject.content.api.ContentResourceEdit;
+import org.sakaiproject.elfinder.sakai.SakaiFsItem;
+import org.sakaiproject.elfinder.sakai.SakaiFsVolume;
 import org.sakaiproject.exception.OverQuotaException;
 import org.sakaiproject.exception.SakaiException;
 import org.sakaiproject.exception.ServerOverloadException;
