@@ -142,11 +142,43 @@ public class SakaiFsService implements FsService {
                 }
         }
         
+        public String getLocalName(FsItem fsi) {
+        	String id = asId(fsi);
+        	try {
+        		int lastSlash = id.lastIndexOf("/");
+
+        		if(lastSlash < 0) return id;
+
+        		if ((lastSlash+1) == id.length()) {
+        			lastSlash = id.lastIndexOf("/", lastSlash-1);
+        		}
+        		return id.substring(lastSlash+1).replace("/", "");
+        	} catch(Exception e) {
+        		return id;
+        	}
+        }
+        
         public Boolean copyContent(InputStream is, String hash) {
         	try {
         		String id = asId(fromHash(hash));
         		ContentResourceEdit resource = getContent().editResource(id);
         		resource.setContent(is);
+        		getContent().commitResource(resource);
+        		return true;
+        	} catch (OverQuotaException | ServerOverloadException | VirusFoundException e) {
+        		e.printStackTrace();
+
+        	} catch (Exception e) {
+        		e.printStackTrace();
+        	}
+        	return false;
+        }
+        
+        public Boolean copyContent(String content, String hash) {
+        	try {
+        		String id = asId(fromHash(hash));
+        		ContentResourceEdit resource = getContent().editResource(id);
+        		resource.setContent(content.getBytes("UTF-8"));
         		getContent().commitResource(resource);
         		return true;
         	} catch (OverQuotaException | ServerOverloadException | VirusFoundException e) {

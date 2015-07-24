@@ -103,7 +103,11 @@ public class SakaiFsVolume implements FsVolume {
     public boolean exists(FsItem newFile) {
         try {
             String id = service.asId(newFile);
-            service.getContent().getResource(id);
+            if (service.getContent().isCollection(id)) {
+                service.getContent().getCollection(id);
+            } else {
+                service.getContent().getResource(id);
+            }
             return true;
         } catch (IdUnusedException iue) {
             return false; // This one we expect.
@@ -178,19 +182,7 @@ public class SakaiFsVolume implements FsVolume {
     }
     
     public String getLocalName(FsItem fsi) {
-    	String id = service.asId(fsi);
-    	try {
-    		int lastSlash = id.lastIndexOf("/");
-
-    		if(lastSlash < 0) return id;
-
-    		if ((lastSlash+1) == id.length()) {
-    			lastSlash = id.lastIndexOf("/", lastSlash-1);
-    		}
-    		return id.substring(lastSlash+1).replace("/", "");
-    	} catch(Exception e) {
-    		return id;
-    	}
+    	return service.getLocalName(fsi);
     }
 
     public FsItem getParent(FsItem fsi) {
