@@ -1,13 +1,16 @@
-package org.sakaiproject.elfinder;
+package org.sakaiproject.elfinder.sakai;
 
 import cn.bluejoe.elfinder.service.FsItem;
 import cn.bluejoe.elfinder.service.FsVolume;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.content.api.*;
+import org.sakaiproject.elfinder.impl.SakaiFsService;
 import org.sakaiproject.entity.api.EntityPropertyNotDefinedException;
 import org.sakaiproject.entity.api.EntityPropertyTypeException;
 import org.sakaiproject.entity.api.ResourceProperties;
+import org.sakaiproject.entity.api.ResourcePropertiesEdit;
 import org.sakaiproject.exception.*;
 
 import java.io.ByteArrayOutputStream;
@@ -44,7 +47,18 @@ public class SakaiFsVolume implements FsVolume {
     public void createFile(FsItem fsi) throws IOException {
         String id = service.asId(fsi);
         try {
-            service.getContent().addResource(id);
+        	String filename = getLocalName(fsi);
+        	String name="", ext="";
+        	int index = filename.lastIndexOf(".");
+        	if(index >= 0){
+        		name = filename.substring(0, index);
+        		ext = filename.substring(index+1);
+        	}
+        	ContentResourceEdit cre = service.getContent().addResource(service.asId(getParent(fsi)), name, ext, 999); 
+            service.getContent().commitResource(cre);
+            //update saved id
+            ((SakaiFsItem)fsi).setId(cre.getId());
+            
         } catch (SakaiException se) {
             throw new IOException("Failed to create new file: "+ id, se);
         }
@@ -52,10 +66,17 @@ public class SakaiFsVolume implements FsVolume {
     }
 
     public void createFolder(FsItem fsi) throws IOException {
-        String id = service.asId(fsi);
-        try {
-            service.getContent().addCollection(id);
-        } catch (SakaiException se) {
+    	String id = service.asId(fsi);
+    	try
+    	{
+    		String collectionId = service.asId(getParent(fsi));
+    		String name = getLocalName(fsi);
+    		ContentCollectionEdit edit = service.getContent().addCollection(collectionId, name);
+    		ResourcePropertiesEdit props = edit.getPropertiesEdit();
+    		props.addProperty(ResourceProperties.PROP_DISPLAY_NAME, name);
+
+    		service.getContent().commitCollection(edit);
+    	} catch (SakaiException se) {
             throw new IOException("Failed to create new folder: "+ id, se);
         }
     }
@@ -82,7 +103,11 @@ public class SakaiFsVolume implements FsVolume {
     public boolean exists(FsItem newFile) {
         try {
             String id = service.asId(newFile);
-            service.getContent().getResource(id);
+            if (service.getContent().isCollection(id)) {
+                service.getContent().getCollection(id);
+            } else {
+                service.getContent().getResource(id);
+            }
             return true;
         } catch (IdUnusedException iue) {
             return false; // This one we expect.
@@ -91,8 +116,8 @@ public class SakaiFsVolume implements FsVolume {
         }
     }
 
-    public FsItem fromPath(String relativePath) {
-        return null;
+    public FsItem fromPath(String path) {
+        return new SakaiFsItem(this, path);
     }
 
     public String getDimensions(FsItem fsi) {
@@ -140,14 +165,24 @@ public class SakaiFsVolume implements FsVolume {
     }
 
     public String getName(FsItem fsi) {
-        // This is the filename.
-        // This needs more test cases
         String id = service.asId(fsi);
-        int lastSlash = id.lastIndexOf("/");
-        if ((lastSlash+1) == id.length()) {
-            lastSlash = id.lastIndexOf("/", lastSlash-1);
+        try {
+        	//ask ContentHostingService for name
+            ContentEntity contentEntity;
+            if (service.getContent().isCollection(id)) {
+                contentEntity = service.getContent().getCollection(id);
+            } else {
+                contentEntity = service.getContent().getResource(id);
+            }
+            return contentEntity.getProperties().getProperty(ResourceProperties.PROP_DISPLAY_NAME);
+        } catch (SakaiException se) {
+            LOG.warn("Failed to get name for: "+ id, se);
         }
-        return id.substring(lastSlash+1).replace("/", "");
+        return id;
+    }
+    
+    public String getLocalName(FsItem fsi) {
+    	return service.getLocalName(fsi);
     }
 
     public FsItem getParent(FsItem fsi) {
@@ -157,7 +192,12 @@ public class SakaiFsVolume implements FsVolume {
     }
 
     public String getPath(FsItem fsi) throws IOException {
-        return service.asId(fsi);
+    	String id = service.asId(fsi);    	
+    	int lastSlash = id.lastIndexOf("/");
+         
+        if(lastSlash < 0) return id;
+        
+        return id.substring(0, lastSlash);
     }
 
     public FsItem getRoot() {
@@ -244,18 +284,25 @@ public class SakaiFsVolume implements FsVolume {
     }
 
     public void rename(FsItem src, FsItem dst) throws IOException {
-        String srcId = service.asId(src);
-        String dstId = service.asId(dst);
+    	String srcId = service.asId(src);
+        String dstName = getLocalName(dst);
+        
         try {
-            service.getContent().copy(srcId, dstId);
-            if (service.getContent().isCollection(srcId)) {
-                service.getContent().removeCollection(srcId);
-            } else {
-                service.getContent().removeResource(srcId);
-            }
-        } catch (SakaiException se) {
-            throw new IOException("Failed to rename file: "+ srcId+ " to "+ dstId, se);
-        }
+        	if (service.getContent().isCollection(srcId)) {
+        		ContentCollectionEdit edit = service.getContent().editCollection(srcId);
+        		ResourcePropertiesEdit props = edit.getPropertiesEdit();
+        		props.addProperty(ResourceProperties.PROP_DISPLAY_NAME, dstName);
 
+        		service.getContent().commitCollection(edit);
+            } else {
+            	ContentResourceEdit edit = service.getContent().editResource(srcId);
+            	ResourcePropertiesEdit props = edit.getPropertiesEdit();
+        		props.addProperty(ResourceProperties.PROP_DISPLAY_NAME, dstName);
+
+        		service.getContent().commitResource(edit);
+            }
+        } catch(SakaiException se) {
+        	throw new IOException("Failed to rename file: "+ srcId+ " to "+ dstName, se);
+        }
     }
 }

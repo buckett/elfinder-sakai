@@ -1,4 +1,4 @@
-package org.sakaiproject.elfinder;
+package org.sakaiproject.elfinder.sakai;
 
 import cn.bluejoe.elfinder.service.FsItem;
 import cn.bluejoe.elfinder.service.FsVolume;
@@ -24,4 +24,8 @@ public class SakaiFsItem implements FsItem {
     public String getId() {
         return id;
     }
+
+	public void setId(String id) {
+		this.id = id;
+	}
 }

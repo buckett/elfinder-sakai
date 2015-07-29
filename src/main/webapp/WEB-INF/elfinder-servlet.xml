@@ -15,9 +15,9 @@
 
 	<!-- find appropriate  command executor for given command-->
 	<bean id="commandExecutorFactory"
-		class="org.sakaiproject.elfinder.SakaiCommandExecutorFactory">
+		class="org.sakaiproject.elfinder.controller.executor.SakaiCommandExecutorFactory">
 		<property name="classNamePattern"
-			value="org.sakaiproject.elfinder.Sakai%sCommandExecutor" />
+			value="org.sakaiproject.elfinder.controller.executors.Sakai%sCommandExecutor" />
 		<property name="classNamePattern2"
 			value="cn.bluejoe.elfinder.controller.executors.%sCommandExecutor" />
 		<property name="map">

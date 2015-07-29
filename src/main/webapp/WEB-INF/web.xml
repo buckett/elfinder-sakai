@@ -14,13 +14,30 @@
 		</listener-class>
 	</listener>
 
-	<filter>
+	<!--<filter>
 		<filter-name>RequestFilter</filter-name>
 		<filter-class>org.sakaiproject.util.RequestFilter</filter-class>
-	</filter>
+	</filter>-->
+	
+	 <filter>
+        <filter-name>sakai.request</filter-name>
+        <filter-class>org.sakaiproject.util.RequestFilter</filter-class>
+        <!-- If you need to do uploads you will need this -->
+        <init-param>
+            <param-name>upload.enabled</param-name>
+            <param-value>false</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>sakai.request</filter-name>
+        <servlet-name>elfinder</servlet-name>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>INCLUDE</dispatcher>
+    </filter-mapping>
 
 	<filter-mapping>
-		<filter-name>RequestFilter</filter-name>
+		<filter-name>sakai.request</filter-name>
 		<servlet-name>elfinder</servlet-name>
 	</filter-mapping>
   

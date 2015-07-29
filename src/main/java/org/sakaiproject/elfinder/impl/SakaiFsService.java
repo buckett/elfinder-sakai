@@ -1,4 +1,4 @@
-package org.sakaiproject.elfinder;
+package org.sakaiproject.elfinder.impl;
 
 import cn.bluejoe.elfinder.service.*;
 
@@ -8,6 +8,8 @@ import org.sakaiproject.content.api.ContentEntity;
 import org.sakaiproject.content.api.ContentHostingService;
 import org.sakaiproject.content.api.ContentResource;
 import org.sakaiproject.content.api.ContentResourceEdit;
+import org.sakaiproject.elfinder.sakai.SakaiFsItem;
+import org.sakaiproject.elfinder.sakai.SakaiFsVolume;
 import org.sakaiproject.exception.OverQuotaException;
 import org.sakaiproject.exception.SakaiException;
 import org.sakaiproject.exception.ServerOverloadException;
@@ -45,27 +47,27 @@ public class SakaiFsService implements FsService {
             }*/
 
         	try {
-
+        		//TODO : add cache/map??
 				for (String[] pair : escapes)
 				{
 					hash = hash.replace(pair[1], pair[0]);
 				}
 				String path = new String(Base64.decodeBase64(hash));
-        		
         		ContentEntity contentEntity;
         		if (contentHostingService.isCollection(path)) {
         			contentEntity = contentHostingService.getCollection(path);
         		} else {
         			contentEntity = contentHostingService.getResource(path);
         		}
-        		String id = contentEntity.getId();
+        		/*String id = contentEntity.getId();
         		String siteId = "";
         		if (id.startsWith(COLLECTION_SITE)) {
         			int nextSlash = id.indexOf('/', COLLECTION_SITE.length());
         			if (nextSlash > 0) {
         				siteId = id.substring(COLLECTION_SITE.length(), nextSlash);
         			}
-        		}        		
+        		}*/
+        		//TODO : getVolumes???? siteId is needed??
         		return new SakaiFsItem(getVolumes()[0], contentEntity.getId());
         	/*} catch (SakaiException se) {
         		throw new IOException("Failed to get file from hash: "+ hash, se);
@@ -75,16 +77,16 @@ public class SakaiFsService implements FsService {
         }
 
         public String getHash(FsItem item) throws IOException {
-                String id = asId(item);
-                
-                String base = new String(Base64.encodeBase64(id.getBytes()));
+        	String id = asId(item);
 
-        		for (String[] pair : escapes)
-        		{
-        			base = base.replace(pair[0], pair[1]);
-        		}
-                //return getContent().getUuid(id);
-                return base;
+        	String base = new String(Base64.encodeBase64(id.getBytes()));
+
+        	for (String[] pair : escapes)
+        	{
+        		base = base.replace(pair[0], pair[1]);
+        	}
+        	//return getContent().getUuid(id);
+        	return base;
         }
 
         public FsSecurityChecker getSecurityChecker() {
@@ -140,11 +142,43 @@ public class SakaiFsService implements FsService {
                 }
         }
         
+        public String getLocalName(FsItem fsi) {
+        	String id = asId(fsi);
+        	try {
+        		int lastSlash = id.lastIndexOf("/");
+
+        		if(lastSlash < 0) return id;
+
+        		if ((lastSlash+1) == id.length()) {
+        			lastSlash = id.lastIndexOf("/", lastSlash-1);
+        		}
+        		return id.substring(lastSlash+1).replace("/", "");
+        	} catch(Exception e) {
+        		return id;
+        	}
+        }
+        
         public Boolean copyContent(InputStream is, String hash) {
         	try {
         		String id = asId(fromHash(hash));
         		ContentResourceEdit resource = getContent().editResource(id);
         		resource.setContent(is);
+        		getContent().commitResource(resource);
+        		return true;
+        	} catch (OverQuotaException | ServerOverloadException | VirusFoundException e) {
+        		e.printStackTrace();
+
+        	} catch (Exception e) {
+        		e.printStackTrace();
+        	}
+        	return false;
+        }
+        
+        public Boolean copyContent(String content, String hash) {
+        	try {
+        		String id = asId(fromHash(hash));
+        		ContentResourceEdit resource = getContent().editResource(id);
+        		resource.setContent(content.getBytes("UTF-8"));
         		getContent().commitResource(resource);
         		return true;
         	} catch (OverQuotaException | ServerOverloadException | VirusFoundException e) {
