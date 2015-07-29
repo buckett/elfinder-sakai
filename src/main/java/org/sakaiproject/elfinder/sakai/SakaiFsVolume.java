@@ -226,6 +226,7 @@ public class SakaiFsVolume implements FsVolume {
     public boolean hasChildFolder(FsItem fsi) {
         String id = service.asId(fsi);
         try {
+            // For sites that don't have a root folder yet this will fail.
             ContentCollection collection = service.getContent().getCollection(id);
             // Just need to check if any of them are collections
             for (String member: collection.getMembers()) {

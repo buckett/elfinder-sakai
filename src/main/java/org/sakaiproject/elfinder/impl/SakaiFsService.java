@@ -13,15 +13,20 @@ import org.sakaiproject.elfinder.sakai.SakaiFsVolume;
 import org.sakaiproject.exception.OverQuotaException;
 import org.sakaiproject.exception.SakaiException;
 import org.sakaiproject.exception.ServerOverloadException;
+import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.SiteService;
+import org.sakaiproject.site.api.SiteService.SelectionType;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.tool.api.ToolManager;
 import org.apache.commons.codec.binary.Base64;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.sakaiproject.content.api.ContentHostingService.COLLECTION_SITE;
+import static org.sakaiproject.site.api.SiteService.SelectionType.*;
 
 /**
  * Created by buckett on 08/07/15.
@@ -32,8 +37,6 @@ public class SakaiFsService implements FsService {
         private SiteService siteService;
         private SessionManager sessionManager;
         private ToolManager toolManager;
-        
-        FsVolume[] _volumes;
         
         String[][] escapes = { { "+", "_P" }, { "-", "_M" }, { "/", "_S" }, { ".", "_D" }, { "=", "_E" } };
 
@@ -67,8 +70,15 @@ public class SakaiFsService implements FsService {
         				siteId = id.substring(COLLECTION_SITE.length(), nextSlash);
         			}
         		}*/
-        		//TODO : getVolumes???? siteId is needed??
-        		return new SakaiFsItem(getVolumes()[0], contentEntity.getId());
+				// See if we can find the siteId.
+				String siteId = null;
+				if (path.startsWith(ContentHostingService.COLLECTION_SITE)) {
+					int nextSlash = path.indexOf("/", COLLECTION_SITE.length());
+					if (nextSlash != -1) {
+						siteId = path.substring(COLLECTION_SITE.length(), nextSlash);
+					}
+				}
+        		return new SakaiFsItem(new SakaiFsVolume(this, siteId), contentEntity.getId());
         	/*} catch (SakaiException se) {
         		throw new IOException("Failed to get file from hash: "+ hash, se);
         	*/} catch (Exception e) {
@@ -104,18 +114,21 @@ public class SakaiFsService implements FsService {
         }
 
         public FsVolume[] getVolumes() {
+			List<Site> sites  = siteService.getSites(ACCESS, null, null, null, null, null);
         	//TODO : current site???
         	//TODO : one volume per entity provider(contents, assignments, announcements...)???
         	//TODO : cache??
-        	//if(_volumes == null)
-        	try {
-        		String currentSiteId = "6508bbe2-2016-4b7c-bf0d-3f8a8d9e6042";
-        		_volumes = new FsVolume[]{ new SakaiFsVolume(this, currentSiteId)};
-    		} catch (Exception e) {
-    			e.printStackTrace();
-    			return new FsVolume[]{};
-    		}
-        	return _volumes;
+			List<FsVolume> volumes = new ArrayList<>(sites.size());
+			for (Site site: sites) {
+				try {
+					String currentSiteId = site.getId();
+					volumes.add(new SakaiFsVolume(this, currentSiteId));
+				} catch (Exception e) {
+					e.printStackTrace();
+					return new FsVolume[]{};
+				}
+			}
+        	return volumes.toArray(new FsVolume[0]);
         }
 
         public FsServiceConfig getServiceConfig() {
