@@ -37,6 +37,7 @@
             <groupId>org.elfinder</groupId>
             <artifactId>elfinder-servlet-2</artifactId>
             <version>1.0-SNAPSHOT</version>
+            <classifier>classes</classifier>
             <type>jar</type>
         </dependency>
     </dependencies>
