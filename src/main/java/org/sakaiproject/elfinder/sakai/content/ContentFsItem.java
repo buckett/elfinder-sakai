@@ -1,4 +1,4 @@
-package org.sakaiproject.elfinder.sakai;
+package org.sakaiproject.elfinder.sakai.content;
 
 import cn.bluejoe.elfinder.service.FsItem;
 import cn.bluejoe.elfinder.service.FsVolume;
@@ -6,12 +6,12 @@ import cn.bluejoe.elfinder.service.FsVolume;
 /**
  * Created by buckett on 08/07/15.
  */
-public class SakaiFsItem implements FsItem {
+public class ContentFsItem implements FsItem {
 
     private final FsVolume fsVolume;
     private String id;
 
-    public SakaiFsItem(FsVolume fsVolume, String id) {
+    public ContentFsItem(FsVolume fsVolume, String id) {
         this.fsVolume = fsVolume;
         this.id = id;
     }

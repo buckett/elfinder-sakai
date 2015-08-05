@@ -23,7 +23,10 @@ public class SakaiRenameCommandExecutor extends AbstractJsonCommandExecutor impl
 		FsItemEx fsi = super.findItem(fsService, target);
 		FsItemEx dst = new FsItemEx(fsi.getParent(), name);
 		fsi.renameTo(dst);
-
+		/*
+ 		* The difference between this and the original one is that it returns details of the original item as being added
+ 		* rather than the new item. Without digging into it this seems wrong.
+ 		*/
 		json.put("added", new Object[] { getFsItemInfo(request, fsi) });
 		json.put("removed", new String[] { target });
 	}

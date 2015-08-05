@@ -6,6 +6,9 @@ import cn.bluejoe.elfinder.controller.executor.CommandExecutor;
 import cn.bluejoe.elfinder.controller.executor.CommandExecutorFactory;
 
 
+/**
+ * This used to chain 2 sets of executors together. The original elFinder ones and the Sakai ones.
+ */
 public class SakaiCommandExecutorFactory implements CommandExecutorFactory
 {
 	String _classNamePattern;

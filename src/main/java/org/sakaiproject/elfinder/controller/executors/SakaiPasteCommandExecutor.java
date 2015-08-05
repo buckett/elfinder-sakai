@@ -7,7 +7,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.json.JSONObject;
-import org.sakaiproject.elfinder.impl.SakaiFsService;
+import org.sakaiproject.elfinder.sakai.SakaiFsService;
 
 import cn.bluejoe.elfinder.controller.executor.AbstractJsonCommandExecutor;
 import cn.bluejoe.elfinder.controller.executor.CommandExecutor;
@@ -45,7 +45,7 @@ public class SakaiPasteCommandExecutor extends AbstractJsonCommandExecutor imple
 			}
 			else
 				sfsService.getContent().copyIntoFolder(sfsService.asId(ftgt), sfsService.asId(fdst));
-			added.add(new FsItemEx(fdstex, sfsService.getLocalName(ftgt)));
+			added.add(new FsItemEx(fdstex, ftgt.getVolume().getName(ftgt)));
 		}
 
 		json.put("added", files2JsonArray(request, added));

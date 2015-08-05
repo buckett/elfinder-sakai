@@ -1,17 +1,13 @@
 package org.sakaiproject.elfinder.controller.executors;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.io.FilenameUtils;
 import org.json.JSONObject;
-import org.sakaiproject.elfinder.impl.SakaiFsService;
+import org.sakaiproject.elfinder.sakai.SakaiFsService;
 
 import cn.bluejoe.elfinder.controller.executor.AbstractJsonCommandExecutor;
 import cn.bluejoe.elfinder.controller.executor.CommandExecutor;
@@ -41,7 +37,7 @@ public class SakaiDuplicateCommandExecutor extends AbstractJsonCommandExecutor i
 			//if target is folder
 			if(ftgtex.isFolder()) {
 				//get folder id
-				String folderId = sfsService.getLocalName(ftgt);
+				String folderId = ftgt.getVolume().getName(ftgt);
 				folderId = folderId.replaceAll("\\(\\d+\\)$", "");
 				
 				//check for new, not existing, folder id

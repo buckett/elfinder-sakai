@@ -20,6 +20,7 @@ public class SakaiMkdirCommandExecutor extends AbstractJsonCommandExecutor imple
 		String name = request.getParameter("name");
 
 		FsItemEx fsi = super.findItem(fsService, target);
+		// This was changed so that we append the trailing slash to the directory
 		FsItemEx dir = new FsItemEx(fsi, name + "/");
 		dir.createFolder();
 

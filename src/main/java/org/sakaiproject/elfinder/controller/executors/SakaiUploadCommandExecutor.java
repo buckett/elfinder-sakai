@@ -9,9 +9,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.fileupload.FileItemStream;
-import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
-import org.sakaiproject.elfinder.impl.SakaiFsService;
+import org.sakaiproject.elfinder.sakai.SakaiFsService;
 
 import cn.bluejoe.elfinder.controller.executor.AbstractJsonCommandExecutor;
 import cn.bluejoe.elfinder.controller.executor.CommandExecutor;
