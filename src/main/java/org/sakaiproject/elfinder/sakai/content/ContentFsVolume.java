@@ -366,5 +366,11 @@ public class ContentFsVolume implements SiteVolume {
             throw new IllegalArgumentException("Passed FsItem must be a SakaiFsItem.");
         }
     }
+
+    @Override
+    public String getURL(FsItem fsItem) {
+        String id = asId(fsItem);
+        return content.getUrl(id);
+    }
 }
 
