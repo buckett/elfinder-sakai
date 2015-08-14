@@ -12,6 +12,9 @@ public class ContentFsItem implements FsItem {
     private String id;
 
     public ContentFsItem(FsVolume fsVolume, String id) {
+        if (id == null) {
+            throw new IllegalArgumentException("ID can't be null");
+        }
         this.fsVolume = fsVolume;
         this.id = id;
     }

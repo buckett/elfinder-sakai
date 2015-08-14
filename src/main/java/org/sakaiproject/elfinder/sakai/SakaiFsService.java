@@ -11,6 +11,7 @@ import org.sakaiproject.elfinder.sakai.content.ContentFsItem;
 import org.sakaiproject.elfinder.sakai.content.ContentFsVolume;
 import org.sakaiproject.elfinder.sakai.content.ContentFsVolumeFactory;
 import org.sakaiproject.elfinder.sakai.content.DropboxFsVolumeFactory;
+import org.sakaiproject.elfinder.sakai.msgcntr.MsgCntrFsVolumeFactory;
 import org.sakaiproject.elfinder.sakai.site.SiteFsItem;
 import org.sakaiproject.elfinder.sakai.site.SiteFsVolume;
 import org.sakaiproject.exception.OverQuotaException;
@@ -54,6 +55,7 @@ public class SakaiFsService implements FsService {
 		toolVolume = new HashMap<>();
 		toolVolume.put("content", new ContentFsVolumeFactory(this));
 		toolVolume.put("dropbox", new DropboxFsVolumeFactory(this));
+		toolVolume.put("msgcntr", new MsgCntrFsVolumeFactory(this));
 	}
 
         String[][] escapes = { { "+", "_P" }, { "-", "_M" }, { "/", "_S" }, { ".", "_D" }, { "=", "_E" } };

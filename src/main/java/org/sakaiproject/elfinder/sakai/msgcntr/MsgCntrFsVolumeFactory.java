@@ -1,27 +1,26 @@
-package org.sakaiproject.elfinder.sakai.content;
+package org.sakaiproject.elfinder.sakai.msgcntr;
 
 import org.sakaiproject.elfinder.sakai.FsVolumeFactory;
 import org.sakaiproject.elfinder.sakai.SakaiFsService;
 import org.sakaiproject.elfinder.sakai.SiteVolume;
 
 /**
- * This is the creator of ContentHosting FsVolumes.
+ * Created by buckett on 10/08/15.
  */
-public class DropboxFsVolumeFactory implements FsVolumeFactory {
+public class MsgCntrFsVolumeFactory implements FsVolumeFactory {
 
     private SakaiFsService service;
 
-    public DropboxFsVolumeFactory(SakaiFsService service) {
+    public MsgCntrFsVolumeFactory(SakaiFsService service) {
         this.service = service;
     }
-
     @Override
     public String getPrefix() {
-        return "dropbox";
+        return "msgcntr";
     }
 
     @Override
     public SiteVolume getVolume(String siteId) {
-        return new DropboxFsVolume(siteId, service);
+        return new MsgCntrFsVolume(service, siteId);
     }
 }

@@ -4,6 +4,7 @@ import cn.bluejoe.elfinder.service.FsItem;
 import cn.bluejoe.elfinder.service.FsVolume;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.elfinder.sakai.FsVolumeFactory;
+import org.sakaiproject.elfinder.sakai.ReadOnlyFsVolume;
 import org.sakaiproject.elfinder.sakai.SakaiFsService;
 import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.site.api.SiteService;
@@ -21,7 +22,8 @@ import java.util.Map;
  * We'll have pre-hashed paths of /siteId/content/ /siteId/forums/ /siteId/
  *
  */
-public class SiteFsVolume implements FsVolume {
+public class SiteFsVolume extends ReadOnlyFsVolume {
+
     public String getSiteId() {
         return siteId;
     }
@@ -39,26 +41,6 @@ public class SiteFsVolume implements FsVolume {
         this.service = service;
         // TODO Injection
         siteService = (SiteService) ComponentManager.get(SiteService.class);
-    }
-
-    @Override
-    public void createFile(FsItem fsi) throws IOException {
-        throw new UnsupportedOperationException("Can't create files here.");
-    }
-
-    @Override
-    public void createFolder(FsItem fsi) throws IOException {
-        throw new UnsupportedOperationException("Can't create folders here.");
-    }
-
-    @Override
-    public void deleteFile(FsItem fsi) throws IOException {
-        throw new UnsupportedOperationException("Can't delete files here.");
-    }
-
-    @Override
-    public void deleteFolder(FsItem fsi) throws IOException {
-        throw new UnsupportedOperationException("Can't delete files here.");
     }
 
     @Override
@@ -160,12 +142,8 @@ public class SiteFsVolume implements FsVolume {
     }
 
     @Override
-    public OutputStream openOutputStream(FsItem fsi) throws IOException {
+    public String getURL(FsItem f) {
         return null;
     }
 
-    @Override
-    public void rename(FsItem src, FsItem dst) throws IOException {
-        throw new UnsupportedOperationException("Can't rename here.");
-    }
 }
