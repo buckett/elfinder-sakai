@@ -7,6 +7,9 @@ import org.sakaiproject.elfinder.sakai.FsVolumeFactory;
 import org.sakaiproject.elfinder.sakai.ReadOnlyFsVolume;
 import org.sakaiproject.elfinder.sakai.SakaiFsService;
 import org.sakaiproject.exception.IdUnusedException;
+import org.sakaiproject.exception.PermissionException;
+import org.sakaiproject.exception.SakaiException;
+import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.SiteService;
 
 import java.io.IOException;
@@ -130,8 +133,17 @@ public class SiteFsVolume extends ReadOnlyFsVolume {
     public FsItem[] listChildren(FsItem fsi) {
         List<FsItem> children = new ArrayList<>();
         String siteId = ((SiteFsItem)fsi).getId();
-        for (Map.Entry<String, FsVolumeFactory> factory : service.getToolVolume().entrySet()) {
-            children.add(factory.getValue().getVolume(siteId).getRoot());
+        try {
+            Site site = siteService.getSiteVisit(siteId);
+            for (Map.Entry<String, FsVolumeFactory> factory : service.getToolVolume().entrySet()) {
+                if (site.getToolForCommonId(factory.getValue().getToolId()) != null) {
+                    children.add(factory.getValue().getVolume(siteId).getRoot());
+                }
+            }
+        } catch (PermissionException pe) {
+            throw new IllegalArgumentException("The current user doesn't have access to: "+ siteId);
+        } catch (IdUnusedException iue) {
+            throw new IllegalArgumentException("There is no site with ID: "+ siteId);
         }
         return children.toArray(new FsItem[0]);
     }

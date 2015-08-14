@@ -25,4 +25,9 @@ public class ContentFsVolumeFactory implements FsVolumeFactory {
     public SiteVolume getVolume(String siteId) {
         return new ContentFsVolume(siteId, service);
     }
+
+    @Override
+    public String getToolId() {
+        return "sakai.resources";
+    }
 }

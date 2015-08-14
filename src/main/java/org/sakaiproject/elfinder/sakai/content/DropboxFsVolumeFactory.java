@@ -24,4 +24,9 @@ public class DropboxFsVolumeFactory implements FsVolumeFactory {
     public SiteVolume getVolume(String siteId) {
         return new DropboxFsVolume(siteId, service);
     }
+
+    @Override
+    public String getToolId() {
+        return "sakai.dropbox";
+    }
 }

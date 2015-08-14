@@ -13,4 +13,6 @@ public interface FsVolumeFactory {
 
     SiteVolume getVolume(String siteId);
 
+    String getToolId();
+
 }

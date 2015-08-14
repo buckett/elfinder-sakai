@@ -23,4 +23,9 @@ public class MsgCntrFsVolumeFactory implements FsVolumeFactory {
     public SiteVolume getVolume(String siteId) {
         return new MsgCntrFsVolume(service, siteId);
     }
+
+    @Override
+    public String getToolId() {
+        return "sakai.forums";
+    }
 }
