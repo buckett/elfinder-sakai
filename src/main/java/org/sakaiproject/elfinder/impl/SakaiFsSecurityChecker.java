@@ -3,6 +3,7 @@ package org.sakaiproject.elfinder.impl;
 import cn.bluejoe.elfinder.service.FsItem;
 import cn.bluejoe.elfinder.service.FsSecurityChecker;
 import cn.bluejoe.elfinder.service.FsService;
+import org.sakaiproject.elfinder.sakai.ReadOnlyFsVolume;
 import org.sakaiproject.elfinder.sakai.SakaiFsService;
 
 import java.io.IOException;
@@ -30,15 +31,17 @@ public class SakaiFsSecurityChecker implements FsSecurityChecker {
 
     @Override
     public boolean isReadable(FsService fsService, FsItem fsi) throws IOException {
-        // All filtering is done by the CHS
+        // All filtering should be done by the volumes.
         return true;
     }
 
     @Override
     public boolean isWritable(FsService fsService, FsItem fsi) throws IOException {
-        // TODO this needs to work across all volumes
-//        String id =  service.asId(fsi);
-        return true;
-//        return service.getContent().allowAddResource(id);
+        if (fsService instanceof ReadOnlyFsVolume) {
+            return false;
+        } else {
+            // TODO this needs to work across all volumes
+           return true;
+        }
     }
 }
